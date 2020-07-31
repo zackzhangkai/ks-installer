@@ -8,3 +8,4 @@ ADD roles /kubesphere/installer/roles
 ADD env /kubesphere/results/env
 ADD playbooks /kubesphere/playbooks
 USER kubesphere
+RUN chmod -R +x /kubesphere
