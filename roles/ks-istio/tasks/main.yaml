@@ -1,12 +1,18 @@
 ---
 
-- name: istio | Check istio
+- name: istio | Check istiod
   shell: >
-    {{ bin_dir }}/kubectl get pods -n istio-system | grep "istiod"
-  register: istio_check
+    {{ bin_dir }}/kubectl -n istio-system get deploy istiod  | grep -w "istiod"
+  register: istiod_check
   failed_when: false
 
-- block:
+- name: istio | Check istio old version
+  shell: helm -n istio-system list | grep "istio-1.4.8"
+  register: istio_old_version_check
+  failed_when: false
+
+- name: istio | Common install
+  block:
     - name: istio | Getting istio installation files
       copy:
         src: "{{ item }}"
@@ -29,11 +35,14 @@
       shell: >
         tar -zxf {{ kubesphere_dir }}/istio/istio-1.6.10-linux-amd64.tar.gz -C {{ kubesphere_dir }}/istio/
 
-    - name: istio | Deploy istio
-      shell: >
-        {{ kubesphere_dir }}/istio/istio-1.6.10/bin/istioctl install -f {{ kubesphere_dir }}/istio/istio-profile-1.6.10.yaml
-      register: istio_result
-      failed_when: "'errors occurred during operation' in istio_result.stderr"
+    - name: istio | Creating manifests
+      template:
+        src: "{{ item.file }}.j2"
+        dest: "{{ kubesphere_dir }}/{{ item.path }}/{{ item.file }}"
+      with_items:
+        - { path: istio, file: istio-profile.yaml }
+        - { path: istio, file: custom-values-jaeger.yaml }
+        - { path: istio, file: jaeger-production.yaml }
 
     - name: istio | Check jaeger-operator
       shell: >
@@ -46,14 +55,7 @@
         {{ bin_dir }}/kubectl delete deploy -n istio-system jaeger-operator
       when:
         - (jaeger_check.stdout.find("deployed") != -1) and (jaeger_check.stdout.find("1.17.1") == -1)
-
-    - name: istio | Creating jaeger manifests
-      template:
-        src: "{{ item.file }}.j2"
-        dest: "{{ kubesphere_dir }}/{{ item.path }}/{{ item.file }}"
-      with_items:
-        - { path: istio, file: custom-values-jaeger.yaml }
-        - { path: istio, file: jaeger-production.yaml }
+      ignore_errors: True
 
     - name: istio | Deploy jaeger-operator
       shell: >
@@ -80,8 +82,43 @@
       delay: 10
       when:
         - (jaeger_check.stdout.find("deployed") == -1) or (jaeger_check.stdout.find("1.17.1") == -1)
+
+    - name: istio | Check prometheus config
+      shell: "{{ bin_dir }}/kubectl -n kubesphere-monitoring-system get secret additional-scrape-configs -o jsonpath='{.data.prometheus-additional.yaml}' | md5sum"
+      register: secret_check
+      failed_when: false
+
+    - block:
+      - name: istio | Delete prometheus config
+        shell: kubectl -n kubesphere-monitoring-system delete secret additional-scrape-configs
+        ignore_errors: True
+
+      - name: istio | Create prometheus config
+        shell: kubectl -n kubesphere-monitoring-system create secret generic additional-scrape-configs --from-file=prometheus-additional.yaml={{ kubesphere_dir }}/istio/prometheus-additional.yaml
+
+      when:
+        - (secret_check.stdout.find("d41d8cd98f00b204e9800998ecf8427e") == -1)
+
+  when: ( istio_old_version_check.stdout.find('deployed') != -1 ) or ( ( istio_old_version_check.stdout == "" ) and ( istiod_check.stdout.find("istiod") == -1 ) )
+
+- name: istio | Upgrade
+  block:
+    - name: xxx
+      shell: kubectl get pods
   when:
-    - (istio_check.stdout.find("Running") == -1)
+    - istio_old_version_check.stdout.find('deployed') != -1
+
+- name: istio | Install
+  block:
+    - name: istio | Deploy istio
+      shell: >
+        {{ kubesphere_dir }}/istio/istio-1.6.10/bin/istioctl install -f {{ kubesphere_dir }}/istio/istio-profile.yaml
+      register: istio_result
+      failed_when: "'errors occurred during operation' in istio_result.stderr"
+
+  when:
+    - (istiod_check.stdout.find("istiod") == -1)
+    - (istio_old_version_check.stdout == "")
 
 - name: servicemesh | import servicemesh status
   shell: >
