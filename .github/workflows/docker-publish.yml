@@ -4,7 +4,6 @@ on:
   push:
     # Publish `master` as Docker `latest` image.
     branches:
-      - master
       - CICD
 
 env:
@@ -43,4 +42,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: 31232
-          script: kubectl -n kubesphere-system rollout restart deploy/ks-installer
+          script: kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"status":{"servicemesh":{"status":"none"}}}' && kubectl -n kubesphere-system rollout restart deploy/ks-installer
