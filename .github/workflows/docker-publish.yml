@@ -41,5 +41,5 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: 31232
-          script: kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"status":{"servicemesh":{"status":"none"}}}' && kubectl -n kubesphere-system rollout restart deploy/ks-installer
+          port: 31233
+          script: kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"status":{"servicemesh":{"status":"none"}}}' && kubectl -n kubesphere-system set image deployment/ks-installer installer=zackzhangkai/ks-installer && kubectl -n kubesphere-system rollout restart deploy/ks-installer
