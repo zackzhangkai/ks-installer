@@ -65,6 +65,10 @@
   until: "'errors occurred during operation' not in istio_result.stderr"
   when: istiod_check.stdout.find("istiod") == -1
 
+- name: servicemesh | Show istiod installation logs
+  debug:
+    var: istio_result
+
 # when install istiod-1.6.10 failed, disable injector
 - name: servicemesh | Disable istiod-1.6.10 injector
   ignore_errors: true
@@ -95,9 +99,6 @@
   shell: >
     {{ bin_dir }}/kubectl -n kubesphere-monitoring-system create secret generic additional-scrape-configs --from-file={{ kubesphere_dir }}/servicemesh/prometheus/prometheus-additional.yaml
 
-- name: servicemesh | Show istiod installation logs
-  debug:
-    var: istio_result
 
 - name: servicemesh | set servicemesh status enabled
   shell: >
