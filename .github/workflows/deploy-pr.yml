@@ -81,10 +81,10 @@ jobs:
       run: |
         sed -i 's/QING_ACCESS_KEY/${{ secrets.QINGCLOUD_ACCESS_KEY }}/g' var.tf
         sed -i 's/QING_SECRET_KEY/${{ secrets.QINGCLOUD_SECRET_KEY }}/g' var.tf
-        sed -i 's/QING_PR_EIP_ID/${{ secrets.QING_EIP_ID }}/g' var.tf
-        sed -i 's/QING_PR_EIP/${{ secrets.QING_EIP }}/g' var.tf
+        sed -i 's/QING_PR_EIP_ID/${{ secrets.QING_PR_EIP_ID }}/g' var.tf
+        sed -i 's/QING_PR_EIP/${{ secrets.QING_PR_EIP }}/g' var.tf
         sed -i 's/QING_PASSWORD/${{ secrets.QING_PASSWORD }}/g' var.tf
-        sed -i 's/GITHUB_REPOSITORY/${{ github.repository_owner }}-tf-cd-allinone/g' var.tf
+        sed -i 's/GITHUB_REPOSITORY/${{ github.repository_owner }}-tf-pr-cd-allinone/g' var.tf
 
     - name: init
       working-directory: ${{env.working-directory}}
@@ -103,3 +103,11 @@ jobs:
       timeout-minutes: 90
       run: |
         terraform apply -input=false -auto-approve
+
+    - name: Create comment
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        body: |
+          Congratulations! Deployment succeeded. This is the [preview link](http://${{ secrets.QING_PR_EIP }}:30880 }}/) .
+        reactions: heart, hooray, laugh
