@@ -39,7 +39,7 @@ jobs:
         ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
     - name: Build image
-      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:PRTEST
+      run: docker build . --file Dockerfile --tag zackzhangkai/ks-installer:PRTEST
 
     - name: Docker login
       uses: azure/docker-login@v1
