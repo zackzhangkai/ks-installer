@@ -50,7 +50,7 @@ jobs:
     - name: Push image
       run: |
         echo "push image"
-        docker push kubespheredev/ks-installer:PRTEST
+        docker push zackzhangkai/ks-installer:PRTEST
 
   deploy:
     timeout-minutes: 150
