@@ -70,7 +70,6 @@ jobs:
       uses: helm/kind-action@v1.0.0-rc.1
 
     - name: Deploy KubeSphere to Kind
-      id: deploy
       run: |
         kubectl apply -f deploy/kubesphere-installer.yaml
         kubectl apply -f deploy/cluster-configuration.yaml
@@ -80,15 +79,12 @@ jobs:
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
       timeout-minutes: 90
-      id: check
 
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
       if: ${{ failure() }}
       with:
-        issue-number: ${{ github.event.pull_request.number }}
-        reactions: eyes
-        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.issue.number }}
         body: |
           Test Failed!
 
@@ -96,11 +92,10 @@ jobs:
 
           https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
 
-    - name: Create or update comment
+    - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
       with:
-        comment-id: ${{ steps.fc.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ github.event.issue.number }}
         body: |
           Test Succeed!
 
