@@ -36,7 +36,7 @@ function wait_status_ok(){
     done
 }
 
-TIMEOUT="${timeout:-1800}"
+TIMEOUT="${$1:-1800}"
 
 export -f wait_status_ok
 
