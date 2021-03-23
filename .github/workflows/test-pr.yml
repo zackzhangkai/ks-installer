@@ -67,7 +67,7 @@ jobs:
 
     - name: echo
       run: |
-        pwd
+        pwd  && ls
 
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
@@ -79,23 +79,22 @@ jobs:
         issue-number: ${{ github.event.issue.number }}
         reactions: eyes
         body: |
-          Test Failed. Go to action to get more infomation!
+          Test Failed!
+
+          Go to action to get more information!
 
           https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
-
-          Your Image is "${{ secrets.DOCKER_USERNAME }}/ks-installer:${{ env.PR_NUMBER }}"
 
       if: ${{ failure() }}
 
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
-      reactions: eyes
       with:
         issue-number: ${{ github.event.issue.number }}
         body: |
           Test Succeed!
 
-          More informations as below:
+          More information:
 
           https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
 
