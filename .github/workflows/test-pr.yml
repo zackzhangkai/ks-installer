@@ -81,7 +81,7 @@ jobs:
 
           https://github.com/zackzhangkai/ks-installer/actions/runs/${{github.run_id}}
 
-          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:{{ env.PR_NUMBER }}
+          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:${{ env.PR_NUMBER }}
 
       if: ${{ failure() }}
 
