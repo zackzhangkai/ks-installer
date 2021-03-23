@@ -81,5 +81,14 @@ jobs:
         status: ${{ job.status }}
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
-        xxx
+          "Test Failed. Go to action to get more infomation!"
+      if: ${{ failure() }}
 
+    - name: Create comment
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        body: |
+          "Test Succeed!"
