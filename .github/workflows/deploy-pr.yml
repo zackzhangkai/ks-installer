@@ -35,13 +35,15 @@ jobs:
         issue_id: ${{ github.event.issue.number }}
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        PR_NUMBER: "${{ github.event.number }}"
+
     - uses: actions/checkout@v2
       with:
         repository: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.repo.full_name }}
         ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
     - name: Build image
-      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:PRTEST
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
     - name: Docker login
       uses: azure/docker-login@v1
@@ -51,8 +53,7 @@ jobs:
 
     - name: Push image
       run: |
-        echo "push image"
-        docker push kubespheredev/ks-installer:PRTEST
+        docker push ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
   deploy:
     timeout-minutes: 150
