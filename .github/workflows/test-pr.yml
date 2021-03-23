@@ -78,9 +78,11 @@ jobs:
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
           Test Failed. Go to action to get more infomation!
+
+          https://github.com/zackzhangkai/ks-installer/actions/runs/${{github.run_id}}
+
           Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:{{ env.PR_NUMBER }}
-          ${{ steps.deploy.outputs.build-log }}
-          ${{ steps.check.outputs }}
+
       if: ${{ failure() }}
 
     - name: Create comment
