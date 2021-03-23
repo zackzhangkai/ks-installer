@@ -36,10 +36,8 @@ function wait_status_ok(){
     done
 }
 
-TIMEOUT="${$1:-1800}"
-
 export -f wait_status_ok
 
-timeout $TIMEOUT bash -c wait_status_ok
+timeout 1800 bash -c wait_status_ok
 
 check_installer_ok
