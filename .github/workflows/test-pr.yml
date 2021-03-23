@@ -73,8 +73,7 @@ jobs:
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.issue.number }}
-        status: ${{ job.status }}
-        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        reactions: eyes
         body: |
           Test Failed. Go to action to get more infomation!
 
@@ -86,14 +85,15 @@ jobs:
 
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
+      reactions: eyes
       with:
         issue-number: ${{ github.event.issue.number }}
-        status: ${{ job.status }}
-        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
           Test Succeed!
 
-          Your Image is "${{ secrets.DOCKER_USERNAME }}/ks-installer:${{env.PR_NUMBER}}"
+          More informations as below:
+
+          https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
 
     - name: slack
       uses: 8398a7/action-slack@v3
