@@ -28,7 +28,6 @@ jobs:
     steps:
 
     - name: Create comment
-      id: fc
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.issue.number }}
