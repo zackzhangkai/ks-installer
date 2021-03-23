@@ -1,4 +1,4 @@
-#  "/retest" comment will deploy a new kubernetes and KubeSphere in an open Pull Request.
+#  "/test" comment will deploy a new kubernetes and KubeSphere in an open Pull Request.
 
 name: Test-PR
 
@@ -7,20 +7,19 @@ on:
     types: [created]
 
 jobs:
-  pr-check:
-    runs-on: ubuntu-latest
-    steps:
-    - name: acknowledge deployment request to commenter
-      id: check
-      uses: khan/pull-request-comment-trigger@master
-      with:
-        trigger: "/retest"
-        reaction: rocket
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-    outputs:
-      triggered: ${{ steps.check.outputs.triggered }}
-
+#  pr-check:
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: acknowledge deployment request to commenter
+#      id: check
+#      uses: khan/pull-request-comment-trigger@master
+#      with:
+#        trigger: "/test"
+#        reaction: rocket
+#      env:
+#        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+#    outputs:
+#      triggered: ${{ steps.check.outputs.triggered }}
   auto-test-pr:
     if: needs.pr-check.outputs.triggered == 'true'
     runs-on: ubuntu-latest
