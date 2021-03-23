@@ -14,7 +14,7 @@ function check_installer_ok(){
             then
                 return
         fi
-    done < <(timeout 10 kubectl logs -n kubesphere-system deploy/ks-installer -f)
+    done < <(timeout 1200 kubectl logs -n kubesphere-system deploy/ks-installer -f)
     echo "ks-install not output 'Welcome to KubeSphere'"
     sleep 20
     exit 1
@@ -37,10 +37,10 @@ function wait_status_ok(){
     done
 }
 
-export -f wait_status_ok
-
 TIMEOUT="${timeout:-1800}"
+
+export -f wait_status_ok
 
 timeout $TIMEOUT bash -c wait_status_ok
 
-check_installer_ok
+check_installer_ok(TIMEOUT)
