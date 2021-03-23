@@ -59,6 +59,7 @@ jobs:
       uses: helm/kind-action@v1.0.0-rc.1
 
     - name: Deploy KubeSphere to Kind
+      id: deploy
       run: |
         kubectl apply -f deploy/kubesphere-installer.yaml && \
         kubectl apply -f deploy/cluster-configuration.yaml && \
@@ -66,22 +67,17 @@ jobs:
 
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
-
-    - name: slack
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-      if: always()
+      id: check
 
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.issue.number }}
-        status: ${{ job.status }}
-        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
           "Test Failed. Go to action to get more infomation!"
+          ${{ steps.deploy.outputs.build-log }}
+          ${{ steps.check.outputs }}
+
       if: ${{ failure() }}
 
     - name: Create comment
@@ -92,3 +88,10 @@ jobs:
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
           "Test Succeed!"
+
+    - name: slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+      if: always()
