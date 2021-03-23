@@ -21,7 +21,7 @@ function check_installer_ok(){
 }
 
 function wait_status_ok(){
-    for ((n=0;n<3;n++))
+    for ((n=0;n<30;n++))
     do
         OK=`kubectl get pod -A| grep -E 'Running|Completed' | wc | awk '{print $1}'`
         Status=`kubectl get pod -A | sed '1d' | wc | awk '{print $1}'`
@@ -31,7 +31,7 @@ function wait_status_ok(){
             n=$((n+1))
         else
             n=0
-            kubectl get all -A
+            kubectl get all -A | grep -vE 'Running|Completed'
         fi
         sleep 1
     done
