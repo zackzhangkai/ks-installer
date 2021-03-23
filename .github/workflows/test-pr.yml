@@ -42,7 +42,7 @@ jobs:
         ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
     - name: Build image
-      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:env.PR_NUMBER
+      run: docker build . --file Dockerfile --tag zackzhangkai/ks-installer:env.PR_NUMBER
 
     - name: Docker login
       uses: azure/docker-login@v1
@@ -73,3 +73,11 @@ jobs:
         status: ${{ job.status }}
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
       if: always()
+
+#    - name: Create comment
+#      uses: peter-evans/create-or-update-comment@v1
+#      with:
+#        issue-number: ${{ github.event.issue.number }}
+#        body: |
+#          Congratulations! Deployment succeeded. This is the [preview link](http://${{ secrets.QING_PR_EIP }}:30880) .
+#        reactions: heart, hooray, laugh
