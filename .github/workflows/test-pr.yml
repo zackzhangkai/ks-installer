@@ -60,8 +60,8 @@ jobs:
 
     - name: Deploy KubeSphere to Kind
       run: |
-        kubectl apply -f deploy/kubesphere-installer.yaml
-        kubectl apply -f deploy/cluster-configuration.yaml
+        kubectl apply -f deploy/kubesphere-installer.yaml && \
+        kubectl apply -f deploy/cluster-configuration.yaml && \
         kubectl set image deploy/ks-installer installer=zackzhangkai/ks-installer:env.PR_NUMBER
 
     - name: Check Cluster Status
