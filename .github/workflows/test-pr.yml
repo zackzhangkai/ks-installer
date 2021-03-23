@@ -42,7 +42,7 @@ jobs:
         ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
     - name: Build image
-      run: docker build . --file Dockerfile --tag zackzhangkai/ks-installer:env.PR_NUMBER
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
     - name: Docker login
       uses: azure/docker-login@v1
@@ -53,7 +53,7 @@ jobs:
     - name: Push image
       run: |
         echo "push image"
-        docker push zackzhangkai/ks-installer:env.PR_NUMBER
+        docker push ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
     - name: Create kind cluster
       uses: helm/kind-action@v1.0.0-rc.1
@@ -63,7 +63,7 @@ jobs:
       run: |
         kubectl apply -f deploy/kubesphere-installer.yaml && \
         kubectl apply -f deploy/cluster-configuration.yaml && \
-        kubectl set image deploy/ks-installer installer=zackzhangkai/ks-installer:env.PR_NUMBER
+        kubectl set image deploy/ks-installer installer=${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
@@ -75,9 +75,9 @@ jobs:
         issue-number: ${{ github.event.issue.number }}
         body: |
           Test Failed. Go to action to get more infomation!
+          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
           ${{ steps.deploy.outputs.build-log }}
           ${{ steps.check.outputs }}
-
       if: ${{ failure() }}
 
     - name: Create comment
@@ -88,6 +88,7 @@ jobs:
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
           Test Succeed!
+          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
     - name: slack
       uses: 8398a7/action-slack@v3
