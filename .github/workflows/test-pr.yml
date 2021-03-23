@@ -100,7 +100,7 @@ jobs:
       with:
         issue-number: ${{ github.event.issue.number }}
         body: |
-          Test Succeed!
+          Congratulations! Test Succeed!
 
           More information:
 
