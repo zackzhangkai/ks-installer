@@ -91,11 +91,11 @@ jobs:
 
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
+      if: ${{ failure() }}
       with:
         issue-number: ${{ github.event.pull_request.number }}
         reactions: eyes
         comment-id: ${{ steps.fc.outputs.comment-id }}
-        if: ${{ failure() }}
         edit-mode: replace
         body: |
           Test Failed!
