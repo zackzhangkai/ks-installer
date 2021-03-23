@@ -25,6 +25,7 @@ jobs:
     if: needs.pr-check.outputs.triggered == 'true'
     runs-on: ubuntu-latest
     needs: pr-check
+    timeout-minutes: 90
     steps:
 
     - name: Create comment
@@ -77,6 +78,7 @@ jobs:
         kubectl -n kubesphere-system get cc ks-installer -o yaml | sed "s/false/true/g" | kubectl replace -n kubesphere-system cc -f -
 
     - name: Check Cluster Status
+
       run: bash scripts/check_cluster_status.sh
       id: check
 
