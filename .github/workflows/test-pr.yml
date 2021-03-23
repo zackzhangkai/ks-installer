@@ -78,9 +78,9 @@ jobs:
         body: |
           Test Failed. Go to action to get more infomation!
 
-          https://github.com/zackzhangkai/ks-installer/actions/runs/${{github.run_id}}
+          https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
 
-          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:${{ env.PR_NUMBER }}
+          Your Image is "${{ secrets.DOCKER_USERNAME }}/ks-installer:${{ env.PR_NUMBER }}"
 
       if: ${{ failure() }}
 
@@ -93,7 +93,7 @@ jobs:
         body: |
           Test Succeed!
 
-          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:${{env.PR_NUMBER}}
+          Your Image is "${{ secrets.DOCKER_USERNAME }}/ks-installer:${{env.PR_NUMBER}}"
 
     - name: slack
       uses: 8398a7/action-slack@v3
