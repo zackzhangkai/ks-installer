@@ -49,3 +49,13 @@ jobs:
         status: ${{ job.status }}
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
       if: always()
+
+    - name: Create comment
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        issue-number: ${{ github.event.issue.number }}
+        body: |
+          Congratulations! Deployment succeeded. This is the [preview link](http://${{ secrets.QING_PR_EIP }}:30880) .
+        reactions: heart, hooray, laugh
+        if: always()
+

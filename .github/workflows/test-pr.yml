@@ -53,7 +53,7 @@ jobs:
     - name: Push image
       run: |
         echo "push image"
-        docker push zackzhangkai/ks-installer:$PR_NUMBER
+        docker push zackzhangkai/ks-installer:env.PR_NUMBER
 
     - name: Create kind cluster
       uses: helm/kind-action@v1.0.0-rc.1
