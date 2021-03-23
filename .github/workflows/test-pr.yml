@@ -65,6 +65,10 @@ jobs:
         kubectl apply -f deploy/cluster-configuration.yaml
         kubectl -n kubesphere-system set image deploy/ks-installer installer=${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
 
+    - name: echo
+      run: |
+        pwd
+
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
       id: check
