@@ -1,13 +1,13 @@
-#  "/test" comment will reinstall KubeSphere in an open Pull Request.
+#  "/test" comment will deploy a new kubernetes and KubeSphere in an open Pull Request.
 
-name: Test-PullRequest
+name: Test-PR
 
 on:
   issue_comment:
     types: [created]
 
 jobs:
-  deploy-check:
+  pr-check:
     runs-on: ubuntu-latest
     steps:
     - name: acknowledge deployment request to commenter
@@ -21,10 +21,10 @@ jobs:
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
 
-  build-and-push:
+  auto-test-pr:
     if: needs.deploy-check.outputs.triggered == 'true'
     runs-on: ubuntu-latest
-    needs: deploy-check
+    needs: pr-check
     steps:
     - name: get pull request ref
       id: get_pull_request_ref
@@ -35,13 +35,14 @@ jobs:
         issue_id: ${{ github.event.issue.number }}
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        PR_NUMBER: "${{ github.event.number }}"
     - uses: actions/checkout@v2
       with:
         repository: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.repo.full_name }}
         ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
     - name: Build image
-      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:PRTEST
+      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:$PR_NUMBER
 
     - name: Docker login
       uses: azure/docker-login@v1
@@ -52,37 +53,23 @@ jobs:
     - name: Push image
       run: |
         echo "push image"
-        docker push kubespheredev/ks-installer:PRTEST
+        docker push zackzhangkai/ks-installer:$PR_NUMBER
 
-  reinstall-kubesphere:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-    - name: delete kubesphere
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.QING_PR_EIP }}
-        username: root
-        password: ${{ secrets.QING_PASSWORD }}
-        script: |
-          curl https://raw.githubusercontent.com/kubesphere/ks-installer/master/.github/workflows/deploy-pr/delete.sh | sh -x -
+    - name: Create kind cluster
+      uses: helm/kind-action@v1.0.0-rc.1
 
-    - name: install kubesphere
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.QING_PR_EIP }}
-        username: root
-        password: ${{ secrets.QING_PASSWORD }}
-        script: |
-          kubectl apply -f https://raw.githubusercontent.com/kubesphere/ks-installer/master/deploy/kubesphere-installer.yaml
-          kubectl apply -f https://raw.githubusercontent.com/kubesphere/ks-installer/master/deploy/cluster-configuration.yaml
-          kubectl -n kubesphere-system set image deployment/ks-installer installer=kubespheredev/ks-installer:PRTEST
-          kubectl -n kubesphere-system rollout restart deploy ks-installer
+    - name: Deploy KubeSphere to Kind
+      run: |
+        kubectl apply -f deploy/kubesphere-installer.yaml
+        kubectl apply -f deploy/cluster-configuration.yaml
+        kubectl set image deploy/ks-installer installer=zackzhangkai/ks-installer:$PR_NUMBER
 
-    - name: Create comment
-      uses: peter-evans/create-or-update-comment@v1
+    - name: Check Cluster Status
+      run: bash scripts/check_cluster_status.sh
+
+    - name: slack
+      uses: 8398a7/action-slack@v3
       with:
-        issue-number: ${{ github.event.issue.number }}
-        body: |
-          Congratulations! Deployment succeeded. This is the [preview link](http://${{ secrets.QING_PR_EIP }}:30880) .
-        reactions: heart, hooray, laugh
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+      if: always()
