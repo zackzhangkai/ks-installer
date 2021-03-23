@@ -86,7 +86,7 @@ jobs:
       uses: peter-evans/find-comment@v1
       id: fc
       with:
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ github.event.number }}
         comment-author: 'github-actions[bot]'
         body-includes: Build output
 
@@ -94,7 +94,7 @@ jobs:
       uses: peter-evans/create-or-update-comment@v1
       if: ${{ failure() }}
       with:
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ github.event.number }}
         reactions: eyes
         comment-id: ${{ steps.fc.outputs.comment-id }}
         edit-mode: replace
@@ -109,7 +109,7 @@ jobs:
       uses: peter-evans/create-or-update-comment@v1
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ github.event.number }}
         body: |
           Test Succeed!
 
