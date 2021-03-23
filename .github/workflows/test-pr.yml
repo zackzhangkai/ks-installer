@@ -74,7 +74,7 @@ jobs:
       with:
         issue-number: ${{ github.event.issue.number }}
         body: |
-          "Test Failed. Go to action to get more infomation!"
+          Test Failed. Go to action to get more infomation!
           ${{ steps.deploy.outputs.build-log }}
           ${{ steps.check.outputs }}
 
@@ -87,7 +87,7 @@ jobs:
         status: ${{ job.status }}
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
-          "Test Succeed!"
+          Test Succeed!
 
     - name: slack
       uses: 8398a7/action-slack@v3
