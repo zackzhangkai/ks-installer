@@ -74,9 +74,11 @@ jobs:
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.issue.number }}
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         body: |
           Test Failed. Go to action to get more infomation!
-          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:env.PR_NUMBER
+          Your Image is ${{ secrets.DOCKER_USERNAME }}/ks-installer:{{ env.PR_NUMBER }}
           ${{ steps.deploy.outputs.build-log }}
           ${{ steps.check.outputs }}
       if: ${{ failure() }}
