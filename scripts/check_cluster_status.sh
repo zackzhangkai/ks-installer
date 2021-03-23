@@ -39,7 +39,6 @@ function wait_status_ok(){
 
 export -f wait_status_ok
 
-# wait 30m
 TIMEOUT="${timeout:-1800}"
 
 timeout $TIMEOUT bash -c wait_status_ok

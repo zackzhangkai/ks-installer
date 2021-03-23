@@ -28,6 +28,7 @@ jobs:
     steps:
 
     - name: Create comment
+      id: fc
       uses: peter-evans/create-or-update-comment@v1
       with:
         issue-number: ${{ github.event.issue.number }}
@@ -80,11 +81,22 @@ jobs:
       run: bash scripts/check_cluster_status.sh
       id: check
 
+    - name: Find Comment
+      uses: peter-evans/find-comment@v1
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Build output
+
     - name: Create comment
       uses: peter-evans/create-or-update-comment@v1
       with:
-        issue-number: ${{ github.event.issue.number }}
+        issue-number: ${{ github.event.pull_request.number }}
         reactions: eyes
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        if: ${{ failure() }}
+        edit-mode: replace
         body: |
           Test Failed!
 
@@ -92,18 +104,18 @@ jobs:
 
           https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
 
-      if: ${{ failure() }}
-
-    - name: Create comment
+    - name: Create or update comment
       uses: peter-evans/create-or-update-comment@v1
       with:
-        issue-number: ${{ github.event.issue.number }}
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
         body: |
           Test Succeed!
 
           More information:
 
           https://github.com/${{ secrets.DOCKER_USERNAME }}/ks-installer/actions/runs/${{github.run_id}}
+        edit-mode: replace
 
     - name: slack
       uses: 8398a7/action-slack@v3
