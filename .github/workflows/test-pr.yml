@@ -42,7 +42,7 @@ jobs:
         ref: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
 
     - name: Build image
-      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:$PR_NUMBER
+      run: docker build . --file Dockerfile --tag kubespheredev/ks-installer:env.PR_NUMBER
 
     - name: Docker login
       uses: azure/docker-login@v1
@@ -62,7 +62,7 @@ jobs:
       run: |
         kubectl apply -f deploy/kubesphere-installer.yaml
         kubectl apply -f deploy/cluster-configuration.yaml
-        kubectl set image deploy/ks-installer installer=zackzhangkai/ks-installer:$PR_NUMBER
+        kubectl set image deploy/ks-installer installer=zackzhangkai/ks-installer:env.PR_NUMBER
 
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
