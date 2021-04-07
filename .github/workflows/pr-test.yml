@@ -66,3 +66,4 @@ jobs:
         status: ${{ job.status }}
         fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
       if: ${{ failure() }}
+
