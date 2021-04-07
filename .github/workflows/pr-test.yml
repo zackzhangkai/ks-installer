@@ -34,7 +34,9 @@ jobs:
         kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"etcd":{"monitoring":false}}}'
         kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"etcd":{"tlsEnable":false}}}'
         kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"kubeedge":{"enabled":false}}}'
+        kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"logging":{"enabled":false}}}'
         kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"servicemesh":{"enabled":false}}}'
+        kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"devops":{"enabled":false}}}'
 
     - name: Check Cluster Status
       run: bash scripts/check_cluster_status.sh
@@ -53,6 +55,22 @@ jobs:
           fi
           set -e
           kubectl -n istio-system get deploy istiod-1-6-10 -oyaml | sed 's/cpu: 500m/cpu: 5m/g' | sed 's/memory: 2Gi/memory: 100Mi/g' | kubectl replace -f - && \
+          break
+        done
+
+    - name: Enable devops Plugin
+      run: |
+        kubectl -n kubesphere-system patch cc ks-installer --type merge --patch '{"spec":{"devops":{"enabled":true}}}'
+        for i in {1..900};do
+          set +e
+          kubectl -n kubesphere-devops-system get deploy | grep ks-jenkins
+          if [[ $? -ne 0 ]];then
+            sleep 1
+            echo "wait $i s..."
+            continue
+          fi
+          set -e
+          kubectl -n kubesphere-devops-system get deploy ks-jenkins -oyaml | sed 's/cpu: 100m/cpu: 10m/g' | sed 's/memory: 1500Mi/memory: 100Mi/g' | kubectl replace -f - && \
           break
         done
 
