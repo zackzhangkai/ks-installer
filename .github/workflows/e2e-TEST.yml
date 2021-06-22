@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 150
     steps:
     - uses: actions/checkout@v2
+    - run: echo ${{ github.event.pull_request.merged }}
 
 #    - name: Clean up
 #      run: kind delete cluster --name chart-testing && docker image prune -f
